@@ -1,0 +1,14 @@
+flowchart LR
+  Event["MSWDO: Create disaster event"]
+  Register["Barangay: Register household and evacuees"]
+  Stub["DISTYNC: Assign stub and QR information"]
+  Claim["Barangay: Verify and confirm relief claim"]
+  Record["DISTYNC: Record distribution and update inventory"]
+  Monitor["MSWDO: Consolidated monitoring and reports"]
+  Prepare["Mayor's Office: Maintain stock and relief packs"]
+  Stock["Mayor's Office: Monitor inventory"]
+
+  Event --> Register --> Stub --> Claim --> Record --> Monitor
+  Prepare -.->|"Relief-pack information and available stock"| Claim
+  Record -->|"Recorded stock movement"| Stock
+  Register -.->|"Registered evacuee data"| Monitor

@@ -1,0 +1,13 @@
+digraph Lost {
+ graph [rankdir=LR,bgcolor="transparent",nodesep=.42,ranksep=.62,pad=.24,splines=polyline,fontname="Arial"];
+ node [shape=box,style="rounded,filled",fontname="Arial",fontsize=13,margin=".22,.15",color="#e9cfe1",fillcolor="#fff4fa",fontcolor="#6e4f69",penwidth=1.2];
+ edge [color="#b98aa8",penwidth=1.4,arrowsize=.65];
+ browser [label="Browser"];
+ front [label="React + Vite\nFrontend on Vercel"];
+ api [label="Express API\non Vercel"];
+ db [label="MongoDB Atlas\nvia Mongoose",shape=cylinder];
+ gemini [label="Gemini API"];
+ browser -> front -> api;
+ api -> db;
+ api -> gemini;
+}

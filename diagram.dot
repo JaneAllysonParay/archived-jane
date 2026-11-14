@@ -1,0 +1,17 @@
+digraph DISTYNC {
+ graph [rankdir=LR, bgcolor="transparent", nodesep=.32, ranksep=.52, pad=.18, splines=ortho, fontname="Arial"];
+ node [shape=box, style="rounded,filled", fontname="Arial", fontsize=12, margin=".18,.13", color="#c9d4ea", fillcolor="#f1f6ff", fontcolor="#283f66", penwidth=1.2];
+ edge [color="#7c92bd", penwidth=1.3, arrowsize=.65];
+ event [label="MSWDO\nDisaster event"];
+ register [label="Barangay\nHousehold registration"];
+ stub [label="DISTYNC\nStub + QR assignment", fillcolor="#f0ecff",color="#d6cbed",fontcolor="#584c91"];
+ claim [label="Barangay\nRelief claim validation"];
+ record [label="DISTYNC\nDistribution + stock update",fillcolor="#f0ecff",color="#d6cbed",fontcolor="#584c91"];
+ monitor [label="MSWDO\nMonitoring + reports"];
+ prep [label="Mayor's Office\nInventory + relief packs",fillcolor="#fff1f7",color="#edcddf",fontcolor="#8b4b6d"];
+ stock [label="Mayor's Office\nInventory monitoring",fillcolor="#fff1f7",color="#edcddf",fontcolor="#8b4b6d"];
+ event -> register -> stub -> claim -> record -> monitor;
+ prep -> claim [style=dashed, color="#c68caa",constraint=false];
+ record -> stock [color="#c68caa",constraint=false];
+ register -> monitor [style=dashed,color="#a7a4ca",constraint=false];
+}
