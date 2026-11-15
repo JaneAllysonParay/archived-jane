@@ -12,6 +12,18 @@ This project uses React, TypeScript, Vite, and React Router.
 2. Start the local development server with npm run dev.
 3. Run npm run typecheck, npm run lint, and npm run build before reviewing a change.
 
+## CI and release flow
+
+The GitHub Actions workflow at `.github/workflows/ci.yml` runs on pull requests targeting `master` and on pushes to `master`. It uses Node.js 24.x and the existing lockfile with `npm ci`, then runs lint, typecheck, and build. There is no test script in `package.json`, so CI does not run tests.
+
+Feature branch → pull request → CI checks (`CI / quality`) → review → merge → Vercel production deployment.
+
+To require CI before merging, open the repository’s **Settings → Branches** and add a branch protection rule for `master` (or create a ruleset targeting `master`). Require pull requests and, if desired, approving reviews. Under required status checks, select `CI / quality` after its first run. Without that GitHub rule, the workflow reports failures but does not block merging.
+
+To check the Vercel release settings, open the project’s **Settings → Environments → Production → Branch Tracking** and confirm the production branch is `master`. Then check **Settings → Build and Deployment → Deployment Checks** for a required check that holds production promotion until it passes. GitHub required checks gate pull request merges; Vercel Deployment Checks separately gate promotion after a production build. Without a required Vercel Deployment Check, a push or merge to the production branch can deploy automatically. The CI workflow itself does not change either platform’s settings.
+
+CI uses Node.js 24.x, which is compatible with the locked Vite version and Vercel’s current default. If the Vercel project has a Node.js version override, align the workflow’s `node-version` with that setting.
+
 ## Routes
 
 - / — archive dashboard
