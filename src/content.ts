@@ -21,7 +21,7 @@ export const site = {
 export const projectLinks = {
   lostFrontend: "https://github.com/JaneAllysonParay/itelect4-project",
   lostBackend: "https://github.com/JaneAllysonParay/itelect4-backend",
-  distyncRepo: "https://github.com/dlslfinalproject/distync.git",
+  distyncRepo: "https://github.com/dlslfinalproject/distync",
   lostDemo: "https://itelect4-project-pi.vercel.app/",
 };
 export const qaStats = [

@@ -587,6 +587,12 @@ function DistyncPage() {
       <Chapter id="reflection" number={6} title="Creator’s Notes">
         <p>Working on DISTYNC helped me connect requirements, system design, data, testing, and team collaboration. I learned to ask how each workflow supports the people involved, and to treat validation and feedback as part of building—not a final checkbox.</p>
       </Chapter>
+
+      <ArchiveSection title="Project source" eyebrow="APPROVED TEAM REPOSITORY">
+        <ul className="source-links">
+          <li><a href={projectLinks.distyncRepo} target="_blank" rel="noopener noreferrer">DISTYNC team repository <span aria-hidden="true">↗</span></a></li>
+        </ul>
+      </ArchiveSection>
     </WorkDetailLayout>
   );
 }

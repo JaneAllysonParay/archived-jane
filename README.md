@@ -38,12 +38,12 @@ Vercel rewrites application routes to the SPA entry point for direct navigation 
 - public/diagrams/ — source-derived workflow and application architecture diagrams
 - planning/ — factual project and design references
 
-The portrait, heat map, and diagrams are reused without modification. Campus Lost & Found screenshots and a finalized resume are not configured, so the page omits those optional items. The DISTYNC team repository remains unpublished, and the Lost & Found live-demo link is not shown.
+The portrait, heat map, and diagrams are reused without modification. Campus Lost & Found screenshots and a finalized resume are not configured, so the page omits those optional items. The approved public DISTYNC team repository is linked from its case study; the Lost & Found live-demo link is not shown.
 
 ## Project framing
 
 DISTYNC is an academic team capstone evaluated in controlled scenarios. The case study distinguishes Jane’s contributions from the team’s work and does not claim a live government deployment. Campus Lost & Found is presented as Jane’s individual academic project, with Codex assistance disclosed.
 
-No commit, push, or deployment was made as part of the local redesign.
+The release-candidate changes are committed locally; no push or deployment has been made.
 
 See [FORMSPREE_SETUP.md](FORMSPREE_SETUP.md) for the Formspree endpoint, email notification, and spam-protection setup steps.
