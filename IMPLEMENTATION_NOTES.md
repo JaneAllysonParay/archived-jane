@@ -1,39 +1,48 @@
-# MVP implementation notes · November 14, 2026
+# Implementation notes — Jane’s Archive
 
-## Phase summary
+## Current state
 
-- [x] Approved three-page scope and design direction translated to React/TypeScript/Vite code
-- [x] Homepage with warm copy, primary projects, analytics spotlight, skills, about and contact
-- [x] DISTYNC case study with source-grounded, high-level operational workflow and controlled-evaluation limitations
-- [x] Campus Lost & Found case study with API/data architecture
-- [x] Neutral image/portrait placeholders; no fabricated screenshots
-- [x] Local public details and link configuration (`src/content.ts`)
-- [x] Mobile CSS breakpoints, visible keyboard focus, semantic markup, reduced motion support
-- [x] TypeScript/TSX syntax transpilation checks (source parses)
-- [x] Static HTML design preview for offline review
-- [ ] Actual `npm install`, typecheck, lint and Vite build (npm registry inaccessible in authoring environment)
-- [ ] Live browser rendering/interaction QA (headless browser blocked by execution-environment policy)
-- [ ] Approve legal/privacy-safe DISTYNC images and team repository link
-- [ ] Add professional portrait, finalized CV, public contact email/LinkedIn
-- [ ] Verify external links and optional Lost & Found live demo
-- [ ] Connect/deploy to hosting only after local review and authorization
+The React, TypeScript, and Vite portfolio has been redesigned as Jane’s Archive: an independent, AO3-inspired archive interface with text-first project entries and chapter-style case studies.
 
-## Instructions for reviewer
+The active redesign branch is redesign/ao3-archive. The baseline branch was clean before the branch was created.
 
-1. Unzip the bundle and inspect `preview/index.html` as a dependency-free style overview. CSS and links should render from the extracted directory structure. The preview is not the React build.
-2. In VS Code terminal with internet, run `npm install` and `npm run dev`, open the printed local URL.
-3. Check both project routes, then run `npm run typecheck && npm run lint && npm run build`.
-4. Report console errors or layout problems to ChatGPT or Codex. Refer to `AGENTS.md`.
+## Implemented
 
-## Intentional omissions
+- Archive header, footer, breadcrumbs, mobile navigation, and skip link
+- Creator dashboard homepage with portrait sidebar and recent works
+- Filterable Works archive with URL-backed tag selection
+- DISTYNC and Campus Lost & Found case-study pages
+- Profile, Tags, Contact, and accessible not-found pages
+- Legacy redirects from the prior project routes
+- Vercel SPA rewrite for direct route loads
+- Page titles, description, color theme, and burgundy favicon
+- Responsive layout, visible focus, reduced-motion styling, and keyboard-scrollable diagrams
 
-- No real DISTYNC beneficiary data, login identity, or unapproved screenshots.
-- No synthetic forecasting-results visualization; that mockup was explicitly rejected.
-- No resume/LinkedIn/email placeholders that navigate to fake locations.
-- No automated deployment or commits to existing project repositories.
+## Content and assets
 
-## Content caveats
+- DISTYNC remains explicitly framed as a team capstone; personal contributions are separated from team work.
+- The workflow diagram and operational heat map are reused from public assets. The heat-map screenshot is not recolored.
+- The Lost & Found architecture diagram and verified GitHub links are retained.
+- The approved public DISTYNC team repository is linked from its case study.
+- The live-demo link, resume action, and empty Lost & Found image gallery are omitted because they are not approved or configured for public display.
+- Configured email, LinkedIn, and GitHub profile links remain available.
 
-- Capstone results are reported in the uploaded 281-page updated DISTYNC manuscript, under controlled disaster-response test conditions.
-- Operational workflow condenses use cases; the Mayor's Office inventory and relief pack preparation is parallel to the Barangay workflow, not necessarily chronologically after it.
-- The Lost & Found architecture is adapted from the project's GitHub README. AI assistance is disclosed.
+## Validation
+
+- npm run typecheck — passed
+- npm run build — passed
+- npm run lint — passed
+- No test script is configured.
+- Browser review observed the homepage, Works archive, a working tag filter, and the DISTYNC case study in the existing local browser tab.
+- The browser review was stopped with Escape before the full route and viewport matrix could be completed. Manual review is still needed at 1440px, 1024px, 768px, 375px, and 320px, plus direct refresh checks for all routes.
+
+## Release candidate review — 2026-11-15
+
+- The approved public DISTYNC team repository is linked from the case study; team attribution and controlled-evaluation framing are unchanged.
+- `npm run typecheck`, `npm run lint`, and `npm run build` passed. `git diff --check` and `git diff --cached --check` passed.
+- The locally configured Formspree ID is included in the production bundle. Formspree inbox delivery has not been tested.
+- The removed `public/assets/distync/01-overview.png` is absent from the source tree and production build. The approved portrait, heat map, and project diagrams remain unchanged.
+- `.env.local` and `tsconfig.tsbuildinfo` are ignored and untracked. Personal review assets are outside the repository, and no backup or review assets are tracked.
+- Source routes, navigation targets, and asset references were reviewed. The full browser viewport and direct-refresh matrix noted above remains pending.
+
+The release-candidate changes are committed locally; no push or deployment has been made.

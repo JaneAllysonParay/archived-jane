@@ -1,29 +1,34 @@
 # Portfolio repository guidance for Codex
 
 ## Goal
-Maintain a concise, polished, accessible internship portfolio for Jane Allyson Paray. Audience priority: Data Analytics, Business Analyst, QA. Preserve approved three-page scope and understated, warm editorial visual style.
 
-## Content constraints
-- Refer to `planning/PORTFOLIO_BRIEF.md`, `planning/SITE_COPY_DRAFT.md`, and `planning/DESIGN_DIRECTION.md` for approved baseline.
-- DISTYNC is a team capstone. Distinguish Jane's contributions and AI assistance from the team's work.
-- Do NOT invent achievements, contact details, demos, awards, test results, app screenshots, model accuracy, or production outcomes.
-- Project metrics are from controlled capstone evaluation, not production guarantees.
-- The forecasting results mockup is explicitly parked. Never add it without fresh permission.
-- Keep the supporting operational workflow faithful to `planning/DISTYNC_HIGH_LEVEL_WORKFLOW.mmd`; do not imply the Mayor's Office inventory preparation occurs only after registration.
-- Do not expose beneficiary PII, LGU credentials, tokens, or unapproved team materials.
-- Missing asset paths in `src/content.ts` must render attractive neutral placeholders, not broken images.
+Maintain Jane’s Archive as a concise, accessible portfolio for Jane Allyson Paray. The priority internship interests are Data Analytics, Business Analysis, and Software Quality Assurance, with Systems Development and related IT work as supporting strengths.
 
-## Engineering constraints
-- React + TypeScript + Vite + React Router. No server/backend or database for the portfolio.
-- Keep external URLs and configurable public details centralized in `src/content.ts`.
-- Use semantic HTML, keyboard-friendly navigation, focus states, mobile layouts, and `prefers-reduced-motion`.
-- Favor clean CSS and small components over new dependencies.
-- Never deploy, push, or modify another project repository without explicit approval.
+The current approved design is a text-first, AO3-inspired personal archive with work listings, tags, and chapter-style case studies. The initial MVP direction in older planning notes is historical; do not restore its purple-gradient landing-page design unless Jane asks.
 
-## Checkpoints
-1. `npm install`
-2. `npm run typecheck`
-3. `npm run build`
-4. Manual mobile + desktop review, keyboard navigation, outbound links, screenshots/consent, and factual audit.
+## Content and privacy
 
-Make small changes; explain and review them before large redesigns.
+- Use planning documents and the existing source as factual references.
+- DISTYNC is a team capstone. Clearly separate Jane’s contributions from team work and describe evaluation results only in their documented context.
+- Do not invent achievements, employment, credentials, contacts, demos, test results, screenshots, model accuracy, dates, or production outcomes.
+- The DISTYNC forecasting-results mockup is intentionally postponed.
+- Keep the Mayor’s Office inventory and relief-pack workflow parallel to Barangay registration, as shown in planning/DISTYNC_HIGH_LEVEL_WORKFLOW.mmd.
+- Do not expose beneficiary personal information, credentials, tokens, or unapproved team materials.
+- Do not publish or link the DISTYNC team repository without documented permission.
+- Hide unavailable optional assets and links gracefully. Never show broken images or placeholders that look like real evidence.
+
+## Engineering
+
+- Continue with React, TypeScript, Vite, and React Router. Do not add a server, database, CMS, or unnecessary dependencies.
+- Keep public contacts, external destinations, and approved image paths centralized in src/content.ts.
+- Preserve the approved portrait, heat-map screenshot, and diagrams; do not recolor or crop evidence assets into misleading representations.
+- Use semantic HTML, keyboard-accessible interactions, visible focus, responsive layouts, and prefers-reduced-motion support.
+- Treat missing resume and Campus Lost & Found screenshots as optional.
+
+## External actions
+
+Do not commit, push, create a pull request, or deploy without Jane’s explicit instruction.
+
+## Validation
+
+When requested or appropriate, run npm run typecheck and npm run build. Run npm run lint when the script exists. Do not claim checks passed unless they ran successfully.

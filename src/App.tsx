@@ -1,258 +1,687 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { projectGalleryImages, projectLinks, qaStats, site } from './content';
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import ProjectGallery from './ProjectGallery';
+import CorrespondenceForm from './CorrespondenceForm';
+import { formspreeEndpoint, projectGalleryImages, projectLinks, qaStats, site } from './content';
+import { tagGroups, workTags, works } from './portfolio';
+import type { ArchiveWork, WorkChapter } from './portfolio';
 
-type IconName = 'arrow' | 'upRight' | 'spark' | 'grid' | 'check' | 'layers' | 'database' | 'chart' | 'code' | 'heart' | 'github' | 'external' | 'shield' | 'mail' | 'menu' | 'back';
-const icons: Record<IconName, ReactNode> = {
-  arrow: <><path d="M4 12h16"/><path d="m13 5 7 7-7 7"/></>,
-  upRight: <><path d="M7 17 17 7M7 7h10v10"/></>,
-  spark: <><path d="m12 3 1.8 6.2L20 11l-6.2 1.8L12 19l-1.8-6.2L4 11l6.2-1.8L12 3Z"/><path d="m19 17 .7 2.3L22 20l-2.3.7L19 23l-.7-2.3L16 20l2.3-.7L19 17Z"/></>,
-  grid: <><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
-  check: <><path d="m5 12 4 4L19 6"/></>,
-  layers: <><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/></>,
-  database: <><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></>,
-  chart: <><path d="M3 3v18h18"/><path d="m7 16 4-5 4 3 5-8"/></>,
-  code: <><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/></>,
-  heart: <><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></>,
-  github: <><path d="M9 19c-4 1-4-2-6-2m12 4v-3.1a3.1 3.1 0 0 0-.8-2.4c2.7-.3 5.5-1.3 5.5-6A4.8 4.8 0 0 0 18.4 6 4.4 4.4 0 0 0 18.3 3S17 2.7 15 4.4a11 11 0 0 0-6 0C7 2.7 5.7 3 5.7 3a4.4 4.4 0 0 0-.1 3A4.8 4.8 0 0 0 4.3 9.5c0 4.7 2.8 5.7 5.5 6A3.1 3.1 0 0 0 9 18v3"/></>,
-  external: <><path d="M14 4h6v6M20 4l-9 9"/><path d="M20 14v6H4V4h6"/></>,
-  shield: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></>,
-  mail: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></>,
-  menu: <><path d="M4 7h16M4 12h16M4 17h16"/></>,
-  back: <><path d="m12 19-7-7 7-7M5 12h15"/></>,
-};
-function Icon({ name, size = 20, className = '' }: {name: IconName; size?: number; className?: string}) {
-  return <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{icons[name]}</svg>;
-}
-function ScrollManager() {
-  const loc = useLocation();
+const mainNavigation = [
+  { label: 'Home', to: '/' },
+  { label: 'Works', to: '/works' },
+  { label: 'Tags', to: '/tags' },
+  { label: 'Profile', to: '/profile' },
+  { label: 'Contact', to: '/contact' },
+];
+
+function ScrollAndTitleManager() {
+  const location = useLocation();
+
   useEffect(() => {
-    if (loc.hash) {
-      const id = decodeURIComponent(loc.hash.slice(1));
-      requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'}));
-    } else {window.scrollTo({top:0,behavior:'auto'});}
-    document.title = loc.pathname === '/' ? 'Jane Allyson Paray · Portfolio' : loc.pathname.includes('distync') ? 'DISTYNC · Jane Allyson Paray' : loc.pathname.includes('lost-and-found') ? 'Campus Lost & Found · Jane Allyson Paray' : 'Page not found · Jane Allyson Paray';
-  }, [loc.pathname, loc.hash]);
+    const titleByPath: Record<string, string> = {
+      '/': 'Jane’s Archive | Jane Allyson Paray',
+      '/works': 'Works | Jane’s Archive',
+      '/works/distync': 'DISTYNC | Jane’s Archive',
+      '/works/lost-and-found': 'Campus Lost & Found | Jane’s Archive',
+      '/profile': 'Profile | Jane’s Archive',
+      '/tags': 'Tags | Jane’s Archive',
+      '/contact': 'Contact | Jane’s Archive',
+    };
+    document.title = titleByPath[location.pathname] ?? 'Page not found | Jane’s Archive';
+
+    if (location.hash) {
+      const id = decodeURIComponent(location.hash.slice(1));
+      requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'start',
+      }));
+    } else {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [location.pathname, location.hash]);
+
   return null;
 }
-function Header() {
-  return <header className="site-header"><div className="container nav-wrap">
-    <Link className="brand" to="/" aria-label="Jane Allyson Paray, homepage"><span className="brand-mark">j<span className="brand-star">✳</span></span><span>jane<span className="brand-dot">.</span></span></Link>
-    <nav aria-label="Primary navigation" className="top-nav"><NavLink to="/#work">Work</NavLink><NavLink to="/#about">About</NavLink><NavLink to="/#contact">Contact</NavLink></nav>
-    <div className="nav-actions">{site.resumePath ? <a className="btn btn-quiet nav-resume" href={site.resumePath} target="_blank" rel="noopener noreferrer">Resume <Icon name="upRight" size={15}/></a> : <Link className="btn btn-quiet nav-resume" to="/#work">Explore work <Icon name="upRight" size={15}/></Link>}</div>
-  </div></header>;
-}
-function Footer() {return <footer className="site-footer"><div className="container footer-inner"><span>Made thoughtfully, one iteration at a time <span aria-hidden="true">✳</span></span><span>© {new Date().getFullYear()} Jane Allyson Paray</span><a href="#top">Back to top ↑</a></div></footer>}
-function Pill({children, tone='plain'}: {children: ReactNode; tone?: string}) {return <span className={`pill pill-${tone}`}>{children}</span>}
-function ButtonLink({to, children, secondary=false, external=false}: {to:string;children:ReactNode;secondary?:boolean;external?:boolean}) {
-  const cls=`btn ${secondary?'btn-outline':'btn-primary'}`;
-  return external ? <a className={cls} href={to} target="_blank" rel="noopener noreferrer">{children}<Icon name="upRight" size={17}/></a> : <Link className={cls} to={to}>{children}<Icon name="arrow" size={17}/></Link>;
-}
-function Kicker({children}: {children: ReactNode}) {return <span className="eyebrow"><span className="eyebrow-dash"/>{children}</span>}
-function SectionTitle({number, eyebrow, title, intro}: {number:string; eyebrow:string;title:string;intro?:string}) {return <div className="section-top"><div><Kicker>{number} / {eyebrow}</Kicker><h2>{title}</h2>{intro&&<p className="section-intro">{intro}</p>}</div></div>}
-function Avatar(){return site.portraitPath ? <img className="avatar-img" src={site.portraitPath} width={96} height={144} alt="Portrait of Jane Allyson Paray"/> : <div className="avatar-placeholder" role="img" aria-label="Portrait coming soon"><span>j.</span><i>✦</i></div>}
-function ProjectPreview({which}: {which:'distync'|'lost'}){
- if(which==='distync') return <div className="preview preview-distync" role="img" aria-label="Conceptual diagram of how DISTYNC brings together registration, relief distribution, inventory and analytics; not an application screenshot"><div className="preview-grain"/><div className="preview-label">DISTYNC / SYSTEM OVERVIEW</div><div className="preview-flow"><span>Registration</span><b>→</b><span>Distribution</span><b>→</b><span>Monitoring</span></div><div className="preview-graphic"><div className="mini-orbit orbit-a"/><div className="mini-orbit orbit-b"/><div className="preview-core"><Icon name="layers" size={29}/></div></div><div className="preview-note">Connecting relief operations across offices</div></div>;
- return <div className="preview preview-lost" role="img" aria-label="Conceptual illustration of the lost-and-found report, browse, and claim journey; not a screenshot"><div className="preview-label">CAMPUS LOST & FOUND / USER JOURNEY</div><div className="lf-panel"><div className="lf-panel-icon"><Icon name="grid" size={21}/></div><span>Report an item</span><span className="lf-trailing">01</span></div><div className="lf-panel"><div className="lf-panel-icon"><Icon name="chart" size={21}/></div><span>Browse listings</span><span className="lf-trailing">02</span></div><div className="lf-panel"><div className="lf-panel-icon"><Icon name="check" size={21}/></div><span>Submit a claim</span><span className="lf-trailing">03</span></div><div className="preview-note">A thoughtful flow to reunite people and belongings</div></div>;
-}
-function ProjectCard({which}: {which:'distync'|'lost'}){const isD=which==='distync';return <article className={`project-card ${isD?'project-primary':''}`}><Link className="project-card-link" to={isD?'/projects/distync':'/projects/lost-and-found'} aria-label={`Read ${isD?'DISTYNC':'Campus Lost & Found'} case study`}><ProjectPreview which={which}/><div className="project-body"><div className="project-meta"><span>{isD?'01 / TEAM CAPSTONE':'02 / INDIVIDUAL PROJECT'}</span><Icon name="upRight" size={19}/></div><h3>{isD?'DISTYNC':'Campus Lost & Found'}</h3><p>{isD?'Bringing disaster-relief records, distribution workflows, inventory, and analytics into one connected system.':'A full-stack application helping campus communities report, find, and claim belongings—with AI-assisted report review.'}</p><div className="tag-row">{(isD?['Analytics','Business Analysis','Software QA']:['Full-stack','API Integration','Testing']).map(tag=><span className="tag" key={tag}>{tag}</span>)}</div></div></Link></article>}
-function DataSpotlight(){return <section className="spotlight-section" id="analytics"><div className="container spotlight-grid"><div className="spotlight-copy"><Kicker>03 / A CLOSER LOOK</Kicker><h2>Making operational data <em>more useful.</em></h2><p>In DISTYNC, our team explored how everyday records could support better relief planning. The work brings together barangay-level descriptive analytics and inventory forecasting with historical model evaluation.</p><div className="spotlight-bullets"><span><Icon name="check" size={16}/>Barangay-level operational heat map</span><span><Icon name="check" size={16}/>Moving Average, Exponential Smoothing & Trend Projection</span><span><Icon name="check" size={16}/>Model evaluation using MAE and RMSE</span></div><Link className="text-link" to="/projects/distync#analytics">Explore the analytics work <Icon name="arrow" size={16}/></Link></div><div className="data-panel"><div className="data-panel-top"><span className="data-panel-chip">DATA → DECISIONS</span><Icon name="chart" size={22}/></div>{site.distyncHeatmapPath?<img src={site.distyncHeatmapPath} alt="DISTYNC barangay operational heat map, displaying aggregated household metrics" loading="lazy"/>:<div className="data-placeholder"><div className="data-sequence"><span><Icon name="database" size={20}/> Records</span><Icon name="arrow" size={16}/><span><Icon name="grid" size={20}/> Aggregation</span><Icon name="arrow" size={16}/><span><Icon name="chart" size={20}/> Insight</span></div><div className="data-place-note">Real heat-map screenshot to be added after final asset review</div></div>}<p className="data-footnote">Data visualization is a tool for understanding operations—not a substitute for field validation.</p></div></div></section>}
-const capabilities=[
- {title:'Data & insight',kind:'data',icon:'chart' as IconName,body:'SQL, relational databases, descriptive analytics, forecasting concepts, reporting and interpretation.'},
- {title:'Business & systems',kind:'systems',icon:'layers' as IconName,body:'Requirements gathering, workflow analysis, functional requirements, documentation and stakeholder collaboration.'},
- {title:'Quality & development',kind:'quality',icon:'shield' as IconName,body:'Functional tests, UAT, defect review, React, TypeScript, Express and API integration.'},
- {title:'Always exploring',kind:'explore',icon:'spark' as IconName,body:'Coursework and hands-on exploration in networking, UiPath, Power Apps, Linux, Windows Server and cloud.'}
-];
-function Home(){return <>
-  <main id="top" tabIndex={-1}><section className="hero container"><div className="hero-copy"><Kicker>HELLO, I'M JANE <span aria-hidden="true">✦</span></Kicker><h1>Curious about <span className="highlight-blue">data.</span><br/>Passionate about <span className="highlight-purple">better systems.</span></h1><p>I'm Jane Allyson Paray, an Information Technology student specializing in Systems Development. I love exploring how data, people, and technology connect—from understanding a workflow to building and testing solutions that make sense.</p><div className="hero-actions"><ButtonLink to="/#work">Explore my work</ButtonLink><ButtonLink to="/projects/distync" secondary>Featured case study</ButtonLink></div><div className="hero-id"><Avatar/><div><span className="hero-id-title">Jane Allyson Paray</span><span className="hero-id-sub">Aspiring IT professional</span></div><span className="id-spark" aria-hidden="true">✳</span></div></div><div className="hero-aside" role="group" aria-label="Jane's approach"><div className="hero-orbit orbit-one"/><div className="hero-orbit orbit-two"/><div className="hero-orbit orbit-three"/><div className="aside-content"><span className="aside-overline">A LITTLE BIT ABOUT MY APPROACH</span><span className="aside-big">Observe.<br/><i>Understand.</i><br/>Improve.</span><div className="aside-rule"/><div className="aside-bottom"><span>Curiosity meets<br/>thoughtful execution.</span><div className="aside-icon"><Icon name="spark" size={28}/></div></div></div></div></section>
-  <section className="section container work-section" id="work"><SectionTitle number="01" eyebrow="SELECTED WORK" title="A few things I've worked on." intro="Two projects, different challenges—and lots of learning along the way."/><div className="project-grid"><ProjectCard which="distync"/><ProjectCard which="lost"/></div></section>
-  <DataSpotlight/>
-  <section className="section container skills-section"><SectionTitle number="04" eyebrow="WHAT I BRING" title="How I like to solve problems." intro="A mix of analysis, building, testing, and curiosity about how things work behind the scenes."/><div className="capabilities-grid">{capabilities.map(c=><div className={`capability cap-${c.kind}`} key={c.title}><div className="cap-icon"><Icon name={c.icon} size={23}/></div><h3>{c.title}</h3><p>{c.body}</p></div>)}</div></section>
-  <section className="section container about-section" id="about"><div className="about-panel"><div><Kicker>05 / BEYOND THE SCREEN</Kicker><h2>A little more<br/><em>about me.</em></h2></div><div className="about-content"><p>I'm studying BS Information Technology, specializing in Systems Development, at De La Salle Lipa (expected June 2027). I'm especially interested in opportunities where I can work with data, understand user needs, and help deliver dependable software.</p><p>Working with project teammates, advisers, and stakeholders has taught me that listening, clear communication, and being open to feedback matter just as much as technical skills.</p><div className="about-cards"><span><strong>Beyond coursework</strong>JPCS student leadership & collaboration</span><span><strong>What motivates me</strong>Learning, thoughtful problem-solving & useful technology</span></div></div></div></section>
-  <Contact/>
-</main></>}
-function Contact(){return <section className="contact-section" id="contact"><div className="container contact-panel"><div><Kicker>LET'S CONNECT <span aria-hidden="true">✳</span></Kicker><h2>Have a project, problem,<br/>or opportunity in mind?</h2><p>I'm seeking internship opportunities in Data Analytics, Business Analysis, and Software QA, where I can contribute, learn from experienced teams, and grow through practical work.</p></div><div className="contact-actions"><a className="btn btn-light" href={site.github} target="_blank" rel="noopener noreferrer"><Icon name="github" size={18}/> Find me on GitHub <Icon name="upRight" size={15}/></a>{site.email&&<a className="btn btn-ghost-light" href={`mailto:${site.email}`}><Icon name="mail" size={17}/> Email me</a>}{site.linkedin&&<a className="btn btn-ghost-light" href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn <Icon name="upRight" size={15}/></a>}</div><span className="contact-deco" aria-hidden="true">✳</span></div></section>}
-function Breadcrumb({project}: {project:string}) {return <div className="breadcrumb"><Link to="/#work"><Icon name="back" size={15}/> Back to work</Link><span>/</span><span>{project}</span></div>}
-function StudyHeader({kicker,title,intro,tags,theme}: {kicker:string;title:string;intro:string;tags:string[];theme:string}) {return <div className={`study-hero study-${theme}`}><Kicker>{kicker}</Kicker><h1>{title}</h1><p>{intro}</p><div className="tag-row">{tags.map(t=><span className="tag" key={t}>{t}</span>)}</div></div>}
-function StudySection({id,kicker,title,children}: {id?:string;kicker:string;title:string;children:ReactNode}) {return <section className="study-section" id={id}><Kicker>{kicker}</Kicker><h2>{title}</h2>{children}</section>}
-type StudyAnchor = { id: string; label: string };
 
-function StudySidebar({ sections, children }: { sections: StudyAnchor[]; children: ReactNode }) {
-  return <aside className="study-sidebar">
-    <nav className="sidebar-card sidebar-toc" aria-label="On this page">
-      <span className="small-label">ON THIS PAGE</span>
-      <ul>{sections.map(section => <li key={section.id}><a href={'#' + section.id}>{section.label}</a></li>)}</ul>
+function ResumeLink({ className = '' }: { className?: string }) {
+  if (!site.resumePath) return null;
+  return <a className={className} href={site.resumePath} target="_blank" rel="noopener noreferrer">Resume <span aria-hidden="true">↗</span></a>;
+}
+
+function NavigationLinks({ className = '' }: { className?: string }) {
+  return (
+    <nav aria-label="Primary navigation" className={className}>
+      {mainNavigation.map((item) => (
+        <NavLink key={item.to} to={item.to} end={item.to === '/'}>
+          {item.label}
+        </NavLink>
+      ))}
     </nav>
-    <details className="sidebar-card sidebar-details">
-      <summary>Project details</summary>
-      <div className="sidebar-details-content">{children}</div>
-    </details>
-  </aside>;
+  );
 }
 
-function Distync() {
-  const distyncImages = projectGalleryImages.distync.length > 0
+function Header() {
+  return (
+    <header className="site-header">
+      <div className="header-inner">
+        <Link className="brand" to="/" aria-label="Jane’s Archive home">
+          <span className="brand-name">Jane’s Archive</span>
+          <span className="brand-caption">Projects, systems & notes</span>
+        </Link>
+        <NavigationLinks className="desktop-navigation" />
+        <ResumeLink className="resume-link" />
+        <details className="mobile-navigation">
+          <summary>Browse archive</summary>
+          <NavigationLinks className="mobile-navigation-links" />
+          <ResumeLink className="mobile-resume-link" />
+        </details>
+      </div>
+    </header>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="site-footer">
+      <div className="footer-inner">
+        <p className="footer-signoff">Thanks for stopping by. Keep asking good questions.</p>
+        <nav aria-label="Footer contact links" className="footer-links">
+          {site.email && <a href={'mailto:' + site.email}>Email</a>}
+          {site.linkedin && <a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
+          {site.github && <a href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a>}
+          <ResumeLink />
+        </nav>
+        <p className="affiliation-note">Independently designed with inspiration from AO3’s archive conventions. Not affiliated with the Organization for Transformative Works.</p>
+      </div>
+    </footer>
+  );
+}
+
+type BreadcrumbItem = { label: string; to?: string };
+
+function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
+  return (
+    <nav className="breadcrumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><Link to="/">Home</Link></li>
+        {items.map((item, index) => (
+          <li key={item.label}>
+            <span aria-hidden="true">/</span>
+            {item.to && index < items.length - 1
+              ? <Link to={item.to}>{item.label}</Link>
+              : <span aria-current="page">{item.label}</span>}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
+function TagList({ tags, label = 'Related tags' }: { tags: string[]; label?: string }) {
+  return (
+    <ul className="tag-list" aria-label={label}>
+      {tags.map((tag) => (
+        <li key={tag}>
+          <Link to={'/works?tag=' + encodeURIComponent(tag)}>{tag}</Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ArchiveSection({ title, eyebrow, children, className = '' }: {
+  title: string;
+  eyebrow?: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={'archive-section ' + className}>
+      <div className="section-heading">
+        <div>
+          {eyebrow && <p className="section-kicker">{eyebrow}</p>}
+          <h2>{title}</h2>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Portrait({ className = '' }: { className?: string }) {
+  if (!site.portraitPath) return <div className={'portrait-placeholder ' + className} aria-hidden="true">JP</div>;
+  return (
+    <img
+      className={'portrait ' + className}
+      src={site.portraitPath}
+      width="400"
+      height="600"
+      alt="Portrait of Jane Allyson Paray"
+      decoding="async"
+    />
+  );
+}
+
+function ProfileSidebar() {
+  return (
+    <aside className="profile-sidebar" aria-label="Creator profile summary">
+      <Portrait className="sidebar-portrait" />
+      <div className="sidebar-profile-copy">
+        <h2>{site.fullName}</h2>
+        <p className="profile-role">Information Technology Student · Systems Development</p>
+        <p>{site.headline}</p>
+        <div className="sidebar-interests">
+          <span className="small-label">INTERNSHIP INTERESTS</span>
+          <ul>
+            <li>Data Analytics</li>
+            <li>Business Analysis</li>
+            <li>Software Quality Assurance</li>
+          </ul>
+        </div>
+        <nav aria-label="Profile shortcuts" className="profile-shortcuts">
+          <Link to="/profile">Profile</Link>
+          <Link to="/works">Browse works</Link>
+          <ResumeLink />
+          <Link to="/contact">Contact Jane</Link>
+        </nav>
+      </div>
+    </aside>
+  );
+}
+
+function WorkBlurb({ work }: { work: ArchiveWork }) {
+  return (
+    <article className="work-blurb">
+      <header className="work-blurb-header">
+        <p className="work-type">{work.projectType}</p>
+        <h3><Link to={work.path}>{work.title}</Link></h3>
+        <p className="work-attribution">{work.attribution}</p>
+      </header>
+      <dl className="blurb-metadata">
+        <div><dt>Role</dt><dd>{work.role}</dd></div>
+        <div><dt>Technologies</dt><dd>{work.technologies.join(' · ')}</dd></div>
+      </dl>
+      <p className="work-summary">{work.summary}</p>
+      <div className="tag-section">
+        <span className="small-label">SKILLS & METHODS</span>
+        <TagList tags={[...work.areas, ...work.methods.slice(0, 4)]} label={work.title + ' skills and methods'} />
+      </div>
+      <div className="evidence-line">
+        <span className="small-label">EVIDENCE</span>
+        <span>{work.evidence.join(' · ')}</span>
+      </div>
+      <p className="read-work"><Link to={work.path}>Read the work <span aria-hidden="true">→</span></Link></p>
+    </article>
+  );
+}
+
+function HomePage() {
+  return (
+    <main id="main-content" tabIndex={-1} className="home-page page-shell">
+      <div className="dashboard-grid">
+        <ProfileSidebar />
+        <div className="dashboard-main">
+          <header className="welcome-header">
+            <p className="section-kicker">CREATOR DASHBOARD</p>
+            <h1>Welcome</h1>
+            <p>Hi, I’m Jane! Welcome to my little corner of the web—a growing archive of projects, ideas, and things I’ve learned while exploring technology.</p>
+            <p>I’m an Information Technology student specializing in Systems Development. I’m interested in how data, workflows, and technology can help create better systems.</p>
+          </header>
+
+          <ArchiveSection title="Recent Works" eyebrow="FROM THE ARCHIVE">
+            <div className="work-list">
+              {works.map((work) => <WorkBlurb key={work.id} work={work} />)}
+            </div>
+          </ArchiveSection>
+
+          <ArchiveSection title="Currently Exploring" eyebrow="AREAS OF INTEREST">
+            <p className="section-copy">I’m looking for opportunities to learn and contribute in these areas, with systems development and related IT skills supporting that work.</p>
+            <TagList tags={['Data Analytics', 'Business Analysis', 'Software Quality Assurance', 'Systems Development', 'Full-Stack Development', 'API Development']} label="Current areas of interest" />
+          </ArchiveSection>
+
+          <ArchiveSection title="About This Archive" eyebrow="A NOTE FOR VISITORS">
+            <p className="section-copy">This site documents project decisions, workflows, technical approaches, testing practices, and lessons learned. DISTYNC is a team capstone; Campus Lost & Found is an individual academic project.</p>
+          </ArchiveSection>
+
+          <ArchiveSection title="Contact & Resume" eyebrow="NEXT STEPS">
+            <p className="section-copy">I’m interested in internship opportunities in Data Analytics, Business Analysis, and Software Quality Assurance.</p>
+            <p className="section-copy">Have a question or a thought about a project? <Link to="/contact#correspondence-corner">Leave a note in my Correspondence Corner.</Link></p>
+            <div className="action-links">
+              <Link to="/contact">Contact information</Link>
+              {site.resumePath && <ResumeLink />}
+              <Link to="/profile">Read my profile</Link>
+            </div>
+          </ArchiveSection>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function WorksPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTag = searchParams.get('tag') ?? '';
+  const tagOptions = Array.from(new Set(works.flatMap(workTags))).sort((a, b) => a.localeCompare(b));
+  const matchedTag = tagOptions.find((tag) => tag.toLocaleLowerCase() === requestedTag.toLocaleLowerCase());
+  const activeTag = requestedTag ? matchedTag ?? requestedTag : '';
+  const filterValue = activeTag && !matchedTag ? '__no_match__' : activeTag;
+  const filteredWorks = activeTag
+    ? works.filter((work) => workTags(work).some((tag) => tag.toLocaleLowerCase() === activeTag.toLocaleLowerCase()))
+    : works;
+
+  function updateFilter(value: string) {
+    if (value) setSearchParams({ tag: value });
+    else setSearchParams({});
+  }
+
+  return (
+    <main id="main-content" tabIndex={-1} className="page-shell">
+      <Breadcrumbs items={[{ label: 'Works' }]} />
+      <header className="page-heading">
+        <p className="section-kicker">THE PROJECT ARCHIVE</p>
+        <h1>Works</h1>
+        <p>{filteredWorks.length} {filteredWorks.length === 1 ? 'work' : 'works'} in the archive.</p>
+      </header>
+      <form className="filter-panel" onSubmit={(event) => event.preventDefault()}>
+        <label htmlFor="work-filter">Filter by area, technology, or method</label>
+        <select id="work-filter" value={filterValue} onChange={(event) => updateFilter(event.target.value)}>
+          <option value="">All works</option>
+          {activeTag && !matchedTag && <option value="__no_match__">No matching tag: {activeTag}</option>}
+          {tagOptions.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
+        </select>
+        {activeTag && <button className="text-button" type="button" onClick={() => updateFilter('')}>Clear filter</button>}
+      </form>
+      <p className="filter-result" aria-live="polite">{filteredWorks.length} matching {filteredWorks.length === 1 ? 'work' : 'works'}.</p>
+      {filteredWorks.length > 0
+        ? <div className="work-list work-list-page">{filteredWorks.map((work) => <WorkBlurb key={work.id} work={work} />)}</div>
+        : <div className="empty-state" role="status"><h2>No works match “{activeTag}”.</h2><p>Choose another tag or view the complete archive.</p><button type="button" className="text-button" onClick={() => updateFilter('')}>Show all works</button></div>}
+      <p className="archive-back-link"><Link to="/">Return to the dashboard</Link></p>
+    </main>
+  );
+}
+
+function ProfilePage() {
+  const skillGroups = [
+    { title: 'Analysis and Documentation', skills: ['Requirements and workflow analysis', 'Technical documentation', 'Architecture planning', 'Stakeholder discussions'] },
+    { title: 'Data and Databases', skills: ['SQL and relational data', 'PostgreSQL', 'Supabase', 'Descriptive analytics', 'Statistical forecasting methods'] },
+    { title: 'Development', skills: ['React', 'TypeScript', 'Vite', 'Node.js and Express', 'Python and FastAPI', 'REST APIs', 'MongoDB Atlas and Mongoose'] },
+    { title: 'Testing and Quality Assurance', skills: ['Functional checks and test cases', 'User acceptance testing', 'Application and API validation', 'Vitest exposure'] },
+    { title: 'Tools and Supporting Technologies', skills: ['Git and GitHub', 'Gemini API integration', 'Vercel', 'Cisco Packet Tracer', 'Power Apps', 'UiPath', 'Ubuntu and Ubuntu Server', 'Windows Server', 'Smartbooks ERP'] },
+  ];
+
+  return (
+    <main id="main-content" tabIndex={-1} className="page-shell profile-page">
+      <Breadcrumbs items={[{ label: 'Profile' }]} />
+      <header className="page-heading">
+        <p className="section-kicker">CREATOR PROFILE</p>
+        <h1>{site.fullName}</h1>
+        <p>Information Technology student · Systems Development</p>
+      </header>
+      <div className="profile-page-intro">
+        <Portrait className="profile-page-portrait" />
+        <div>
+          <h2>About Me</h2>
+          <p>I’m studying for a Bachelor of Science in Information Technology, specializing in Systems Development, at De La Salle Lipa. My expected graduation is June 2027.</p>
+          <p>I enjoy understanding a problem, looking for useful patterns in data, and checking that a system works for the people who rely on it.</p>
+        </div>
+      </div>
+
+      <ArchiveSection title="Areas of Interest" eyebrow="WHAT I’M EXPLORING">
+        <p className="section-copy">I’m especially interested in Data Analytics, Business Analysis, and Software Quality Assurance. Systems development, databases, and application work give me supporting experience I can keep building on.</p>
+        <TagList tags={['Data Analytics', 'Business Analysis', 'Software Quality Assurance', 'Systems Development']} label="Career interests" />
+      </ArchiveSection>
+
+      <ArchiveSection title="Technical Skills" eyebrow="PROJECTS & ACADEMIC EXPERIENCE">
+        <div className="skill-groups">
+          {skillGroups.map((group) => (
+            <section className="skill-group" key={group.title}>
+              <h3>{group.title}</h3>
+              <ul>{group.skills.map((skill) => <li key={skill}>{skill}</li>)}</ul>
+            </section>
+          ))}
+        </div>
+        <p className="small-note">Coursework and lab tools are included as academic exposure, not as claims of professional mastery.</p>
+      </ArchiveSection>
+
+      <ArchiveSection title="Leadership and Activities" eyebrow="WORKING WITH PEOPLE">
+        <p className="section-copy">I have served in JPCS leadership roles, including executive secretary and executive vice president. These roles and my project collaboration have helped me practice clear communication, reliability, and openness to feedback. I have also worked with teammates, advisers, and stakeholders in academic project settings.</p>
+      </ArchiveSection>
+
+      <ArchiveSection title="What I’m Looking For" eyebrow="NEXT CHAPTER">
+        <p className="section-copy">I’m interested in internship opportunities where I can contribute to practical work, learn from experienced teams, and continue growing in analytics, business analysis, quality assurance, and systems-related work.</p>
+        <p className="action-links"><Link to="/contact">Contact me about an opportunity</Link><Link to="/works">Browse project work</Link></p>
+      </ArchiveSection>
+    </main>
+  );
+}
+
+function TagsPage() {
+  return (
+    <main id="main-content" tabIndex={-1} className="page-shell tags-page">
+      <Breadcrumbs items={[{ label: 'Tags' }]} />
+      <header className="page-heading">
+        <p className="section-kicker">SKILLS & TOPICS</p>
+        <h1>Tags</h1>
+        <p>Browse skills and methods represented in the project archive. Each tag leads to matching work.</p>
+      </header>
+      <div className="tag-index">
+        {tagGroups.map((group) => (
+          <ArchiveSection title={group.title} key={group.title}>
+            <TagList tags={group.tags} label={group.title} />
+          </ArchiveSection>
+        ))}
+      </div>
+      <p className="small-note">Tags describe project experience or areas of interest; they aren’t popularity counts or proficiency rankings.</p>
+    </main>
+  );
+}
+
+function ContactPage() {
+  return (
+    <main id="main-content" tabIndex={-1} className="page-shell contact-page">
+      <Breadcrumbs items={[{ label: 'Contact' }]} />
+      <header className="page-heading">
+        <p className="section-kicker">SAY HELLO</p>
+        <h1>Contact</h1>
+        <p>I’m open to internship conversations in Data Analytics, Business Analysis, and Software Quality Assurance.</p>
+      </header>
+      <section id="correspondence-corner" className="archive-section correspondence-section" aria-labelledby="leave-note-title">
+        <div className="section-heading">
+          <div>
+            <p className="section-kicker">CORRESPONDENCE CORNER</p>
+            <h2 id="leave-note-title">Leave a Note</h2>
+          </div>
+        </div>
+        {formspreeEndpoint
+          ? <CorrespondenceForm endpoint={formspreeEndpoint} />
+          : <p className="form-not-configured">The note form is not set up yet. Please use one of the verified contact options below to get in touch.</p>}
+      </section>
+      <section className="contact-details" aria-labelledby="contact-details-title">
+        <h2 id="contact-details-title">Professional links</h2>
+        <dl>
+          {site.email && <div><dt>Email</dt><dd><a href={'mailto:' + site.email}>{site.email}</a></dd></div>}
+          {site.linkedin && <div><dt>LinkedIn</dt><dd><a href={site.linkedin} target="_blank" rel="noopener noreferrer">Jane Allyson Paray on LinkedIn <span aria-hidden="true">↗</span></a></dd></div>}
+          {site.github && <div><dt>GitHub</dt><dd><a href={site.github} target="_blank" rel="noopener noreferrer">Jane Allyson Paray on GitHub <span aria-hidden="true">↗</span></a></dd></div>}
+          {site.resumePath && <div><dt>Resume</dt><dd><ResumeLink className="inline-link" /></dd></div>}
+        </dl>
+      </section>
+      <p className="contact-note">Email is shown in full so it can be copied even when a mail handler is unavailable.</p>
+      <p className="archive-back-link"><Link to="/">Return to the dashboard</Link></p>
+    </main>
+  );
+}
+
+function WorkMetadata({ work }: { work: ArchiveWork }) {
+  const entries = [
+    { label: 'Project Type', value: work.projectType },
+    { label: 'Creator / Contributors', value: work.attribution },
+    { label: 'My Role', value: work.role },
+    { label: 'Technologies', value: work.technologies.join(' · ') },
+    { label: 'Skills Demonstrated', value: work.areas.join(' · ') },
+    { label: 'Academic Context', value: work.academicContext },
+    { label: 'Evidence Available', value: work.evidence.join(' · ') },
+  ];
+
+  return (
+    <dl className="work-metadata">
+      {entries.map((entry) => <div key={entry.label}><dt>{entry.label}</dt><dd>{entry.value}</dd></div>)}
+    </dl>
+  );
+}
+
+function ChapterIndex({ chapters }: { chapters: WorkChapter[] }) {
+  return (
+    <nav className="chapter-index" aria-label="Chapters in this work">
+      <h2>In this work</h2>
+      <ol>
+        {chapters.map((chapter, index) => (
+          <li key={chapter.id}><a href={'#' + chapter.id}><span>Chapter {String(index + 1).padStart(2, '0')}</span>{chapter.title}</a></li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
+function Chapter({ id, number, title, children }: {
+  id: string;
+  number: number;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="chapter" id={id} aria-labelledby={id + '-title'}>
+      <p className="section-kicker">CHAPTER {String(number).padStart(2, '0')}</p>
+      <h2 id={id + '-title'}>{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function WorkDetailLayout({ work, children }: { work: ArchiveWork; children: ReactNode }) {
+  return (
+    <main id="main-content" tabIndex={-1} className="page-shell work-detail-page">
+      <Breadcrumbs items={[{ label: 'Works', to: '/works' }, { label: work.title }]} />
+      <header className="work-detail-heading">
+        <p className="section-kicker">{work.projectType.toUpperCase()}</p>
+        <h1>{work.title}</h1>
+        <p className="work-attribution">{work.attribution}</p>
+        <p className="work-summary">{work.summary}</p>
+        <TagList tags={work.areas} label={work.title + ' focus areas'} />
+      </header>
+      <WorkMetadata work={work} />
+      <section className="creator-notes" aria-labelledby="creator-notes-title">
+        <p className="section-kicker">A PERSONAL NOTE</p>
+        <h2 id="creator-notes-title">Creator’s Notes</h2>
+        <p>{work.creatorNotes}</p>
+      </section>
+      <ChapterIndex chapters={work.chapters} />
+      <article className="reading-column">{children}</article>
+      <nav className="work-end-navigation" aria-label="Continue browsing">
+        <Link to="/works">← Back to all works</Link>
+        <Link to="/profile">About the creator</Link>
+      </nav>
+    </main>
+  );
+}
+
+function DiagramViewer({ title, src, alt, hintId, minWidth = 900 }: {
+  title: string;
+  src: string;
+  alt: string;
+  hintId: string;
+  minWidth?: number;
+}) {
+  return (
+    <figure className="diagram-card">
+      <figcaption className="diagram-card-heading">
+        <strong>{title}</strong>
+        <a href={src} target="_blank" rel="noopener noreferrer">Open full-size diagram <span aria-hidden="true">↗</span></a>
+      </figcaption>
+      <p className="diagram-scroll-hint" id={hintId}>On a narrow screen, scroll horizontally to read the full diagram.</p>
+      <div className="diagram-viewport" role="region" aria-label={'Scrollable ' + title.toLowerCase()} aria-describedby={hintId} tabIndex={0}>
+        <img src={src} alt={alt} loading="lazy" decoding="async" style={{ minWidth }} />
+      </div>
+    </figure>
+  );
+}
+
+function DistyncPage() {
+  const work = works.find((item) => item.id === 'distync')!;
+  const heatmapImages = projectGalleryImages.distync.length > 0
     ? projectGalleryImages.distync
     : site.distyncHeatmapPath
-      ? [{ src: site.distyncHeatmapPath, alt: 'DISTYNC operational heat map' }]
+      ? [{
+          src: site.distyncHeatmapPath,
+          alt: 'DISTYNC barangay operational heat map showing aggregated operational indicators.',
+          caption: 'Operational heat map. The view summarizes barangay-level records; it is not a hazard map and does not show individual household locations.',
+        }]
       : [];
-  const anchors: StudyAnchor[] = [
-    { id: 'challenge', label: 'The challenge' },
-    { id: 'contribution', label: 'My contribution' },
-    { id: 'workflow', label: 'Operational workflow' },
-    { id: 'analytics', label: 'Analytics' },
-    { id: 'testing', label: 'Testing & evaluation' },
-    { id: 'improvements', label: 'What I would improve' },
-  ];
 
-  return <main id="top" tabIndex={-1} className="container study-layout">
-    <Breadcrumb project="DISTYNC"/>
-    <StudyHeader kicker="01 / TEAM CAPSTONE" title="DISTYNC: Connecting people, records, and relief operations." intro="A multi-office disaster relief management system designed to make fragmented data and workflows easier to monitor—while respecting established LGU procedures." theme="blue" tags={['Data analytics','Business analysis','Quality assurance','Systems development']}/>
-    <div className="study-overview">
-      <div><span className="small-label">PROJECT TYPE</span><strong>Team capstone</strong></div>
-      <div><span className="small-label">FOCUS</span><strong>LGU disaster relief workflows</strong></div>
-      <div><span className="small-label">STACK</span><strong>React · Express · PostgreSQL · Python</strong></div>
-    </div>
-    <div className="study-grid">
-      <article className="study-body">
-        <StudySection id="challenge" kicker="01 / CONTEXT" title="The challenge">
-          <p>Disaster-relief operations involve coordinated work across barangays, the Municipal Social Welfare and Development Office (MSWDO), and the Office of the Mayor. In the project context, paper forms, spreadsheets, and separate records made household monitoring, distribution tracking, and inventory reconciliation harder to consolidate.</p>
-          <p>Our team developed DISTYNC, a centralized role-based Progressive Web Application (PWA) that connects those workflows with reporting, descriptive analytics, and selected offline support.</p>
-          <div className="support-overview">
-            <span className="small-label">WHO IT SUPPORTS</span>
-            <ul>
-              <li>Barangay officials — registration and relief distribution</li>
-              <li>MSWDO — monitoring, analytics and reports</li>
-              <li>Mayor's Office — inventory and forecasting</li>
-              <li>Donors / NGOs — public read-only donation information</li>
-            </ul>
-          </div>
-        </StudySection>
-        <StudySection id="contribution" kicker="02 / MY PART IN THE TEAM" title="Where I contributed">
-          <div className="contribution-list">
-            <div><span>01</span><p><strong>Requirements & systems thinking.</strong> Participated in requirements refinement, data dictionary work, architecture planning, technical documentation, and stakeholder discussions.</p></div>
-            <div><span>02</span><p><strong>Technology & implementation.</strong> Researched technology choices, established the PostgreSQL database hosted by Supabase, helped start AI-assisted development, and worked on the Mayor's forecasting feature using AI assistance.</p></div>
-            <div><span>03</span><p><strong>Validation & communication.</strong> Helped prepare and execute testing, assisted with stakeholder demonstrations and UAT, reviewed findings, and contributed to final presentations.</p></div>
-          </div>
-        </StudySection>
-        <StudySection id="workflow" kicker="03 / BUSINESS ANALYSIS" title="How the operations connect">
-          <p>The MSWDO creates the disaster-event context, barangay officials register households and verify relief claims, and DISTYNC records accepted distributions and their inventory effects. Separately, the Mayor's Office maintains stock and relief-pack templates. Recorded and successfully synchronized information supports municipality-wide monitoring.</p>
-          <div className="workflow-card">
-            <div className="workflow-card-top"><strong>High-level operational workflow</strong><a href="/diagrams/distync-flow.svg" target="_blank" rel="noopener noreferrer" className="diagram-open">Open full diagram <Icon name="upRight" size={13}/></a></div>
-            <p className="diagram-scroll-cue diagram-scroll-cue--workflow" id="workflow-scroll-cue">Scroll horizontally to view the full diagram <span aria-hidden="true">↔</span></p>
-            <div className="workflow-image-viewport diagram-viewport--workflow" role="region" aria-label="Scrollable high-level operational workflow diagram" aria-describedby="workflow-scroll-cue" tabIndex={0}>
-              <img className="diagram-image diagram-image--workflow" src="/diagrams/distync-flow.svg" alt="High-level workflow: MSWDO creates disaster event, Barangay registers evacuees, system assigns stub and QR, Barangay verifies claims, system records distribution and inventory, then MSWDO monitors and reports. Mayor's Office stock and relief packs feed the claim workflow in parallel." loading="lazy"/>
-            </div>
-            <p>Based on the capstone's documented use cases. Prepared offline work is queued and is centrally accepted only after successful synchronization.</p>
-          </div>
-        </StudySection>
-        <StudySection id="analytics" kicker="04 / DATA ANALYTICS" title="Turning records into insight">
-          <p><strong>Descriptive analytics:</strong> The project includes a barangay-level operational heat map showing aggregated disaster-operation indicators—not individual household locations or hazard predictions.</p>
-          <p><strong>Forecasting:</strong> The Python analytics service implements Moving Average, Exponential Smoothing and Trend Projection. Where suitable history exists, rolling-origin model evaluation compares errors using MAE and RMSE. A unique recommended model is shown only when the evaluation supports one; this is decision support, not a guarantee of real-world accuracy.</p>
-          <div className="analytics-method"><span>Historical usage</span><Icon name="arrow" size={17}/><span>Compare models</span><Icon name="arrow" size={17}/><span>Evaluate errors</span><Icon name="arrow" size={17}/><span>Support planning</span></div>
-          <div className={'asset-panel' + (distyncImages.length > 0 ? ' asset-panel-with-gallery' : '')}>
-            {distyncImages.length > 0
-              ? <ProjectGallery label="DISTYNC approved project images" images={distyncImages}/>
-              : <><Icon name="chart" size={24}/><strong>Operational heat map</strong><span>Approved screenshot will be placed here when assets are finalized.</span></>}
-          </div>
-        </StudySection>
-        <StudySection id="testing" kicker="05 / QUALITY ASSURANCE" title="Tested, evaluated, and improved">
-          <p>Testing and stakeholder evaluation formed an important part of the project. The results below are those reported by our capstone study under controlled disaster-response scenarios—not production-service guarantees.</p>
-          <div className="qa-grid">{qaStats.map(s=><div className="qa-stat" key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>)}</div>
-          <p>Across <strong>15 participants</strong>, the manuscript reports 72 accepted UAT cases. Its System Usability Scale result was <strong>67.17</strong>, just below the chosen benchmark of 68—an honest reminder that user familiarization and interface refinement remain important.</p>
-          <div className="insight-note"><Icon name="shield" size={20}/><span>Passing the defined test cases does not mean the system is fully secure, universally reliable, or field-deployed for live disaster operations.</span></div>
-        </StudySection>
-        <StudySection id="improvements" kicker="06 / REFLECTION" title="What I would improve next">
-          <p>Before wider adoption, DISTYNC needs continued usability refinement, real-world field validation, stronger protection for sensitive locally stored data, and tested backup and recovery practices. Building it helped me connect technical choices with actual user needs—and taught me to see testing and feedback as essential parts of development.</p>
-        </StudySection>
-      </article>
-      <StudySidebar sections={anchors}>
-        <div className="sidebar-detail-block">
-          <span className="small-label">TECHNOLOGY</span>
-          <div className="side-pills"><Pill>React + Vite</Pill><Pill>Node / Express</Pill><Pill>PostgreSQL</Pill><Pill>Supabase</Pill><Pill>Python / FastAPI</Pill><Pill>PWA</Pill></div>
-        </div>
-        <div className="sidebar-detail-block">
-          <span className="small-label">PROJECT SOURCE</span>
-          <p>Team repository available after permission and public-content review.</p>
-          {projectLinks.distyncRepo&&<a className="text-link" href={projectLinks.distyncRepo} target="_blank" rel="noopener noreferrer">View source <Icon name="upRight" size={16}/></a>}
-        </div>
-      </StudySidebar>
-    </div>
-    <NextProject to="/projects/lost-and-found" title="Campus Lost & Found" subtitle="Next project"/>
-  </main>;
+  return (
+    <WorkDetailLayout work={work}>
+      <Chapter id="context" number={1} title="The Context">
+        <p>Disaster-relief coordination involves municipal offices and barangays working from shared information. In the project context, paper forms, spreadsheets, and separate records made household and evacuee monitoring, relief distribution, and inventory records harder to consolidate.</p>
+        <p>DISTYNC was designed and developed by our academic capstone team for selected local-government workflows. It is a role-based Progressive Web App intended to connect registration, relief distribution, inventory, monitoring, reporting, and analytics. It was evaluated in controlled scenarios; it was not an individually built production platform or a live government deployment.</p>
+        <h3>People and offices in the workflow</h3>
+        <ul>
+          <li><strong>MSWDO:</strong> creates disaster-event context and monitors consolidated records and reports.</li>
+          <li><strong>Barangay users:</strong> register households and evacuees, then verify relief claims.</li>
+          <li><strong>Mayor’s Office:</strong> maintains inventory and relief-pack information in a parallel workflow.</li>
+          <li><strong>Donors and NGOs:</strong> can view relevant public donation information as read-only users.</li>
+        </ul>
+      </Chapter>
+
+      <Chapter id="contributions" number={2} title="My Contributions">
+        <p>DISTYNC was a team capstone. These are the areas I contributed to, distinct from the work completed by the whole team.</p>
+        <ul className="contribution-list">
+          <li><strong>Requirements and workflow analysis:</strong> participated in requirements refinement, data-dictionary work, architecture planning, technical documentation, and stakeholder discussions.</li>
+          <li><strong>Technology research and setup:</strong> researched technology choices and established the Supabase-hosted PostgreSQL database.</li>
+          <li><strong>AI-assisted development:</strong> helped initiate AI-assisted system development and reviewed implementation with the team.</li>
+          <li><strong>Forecasting analytics:</strong> developed the Mayor’s Office forecasting analytics with AI assistance.</li>
+          <li><strong>Testing and communication:</strong> helped with manual and automated testing, user acceptance testing, stakeholder demonstrations, results interpretation, and presentations.</li>
+        </ul>
+      </Chapter>
+
+      <Chapter id="workflow" number={3} title="How the System Works">
+        <p>The operational flow begins when MSWDO creates a disaster event. Barangay users register households and evacuees; the system supports stub and QR information for relief claims. Barangay staff verify the claim and record accepted distribution. MSWDO uses the consolidated records for monitoring and reporting.</p>
+        <p>The Mayor’s Office maintains stock and relief-pack information in a separate, parallel workflow. This work supports distribution; it does not occur only after household registration.</p>
+        <p>Selected transactions can be prepared offline. An offline transaction is queued and is not centrally accepted until it synchronizes while the app is active and passes server-side validation.</p>
+        <DiagramViewer
+          title="DISTYNC operational workflow"
+          src="/diagrams/distync-flow.svg"
+          alt="MSWDO creates a disaster event, followed by Barangay household registration, stub and QR assignment, claim verification, and distribution recording. MSWDO monitors consolidated records. The Mayor’s Office maintains stock and relief packs in a parallel workflow that supports claims."
+          hintId="workflow-diagram-hint"
+          minWidth={980}
+        />
+      </Chapter>
+
+      <Chapter id="analytics" number={4} title="Turning Data Into Insight">
+        <p>The operational heat map summarizes barangay-level indicators from recorded operations. It is descriptive, not a hazard map, and does not display household locations.</p>
+        {heatmapImages.length > 0
+          ? <ProjectGallery label="DISTYNC operational heat-map evidence" images={heatmapImages} />
+          : null}
+        <h3>Inventory-demand forecasting</h3>
+        <p>The analytics service implements Moving Average, Exponential Smoothing, and Trend Projection. Where the available history is sufficient, rolling-origin historical evaluation compares forecast errors with MAE and RMSE. A recommended model is surfaced only when the evaluation supports a meaningful choice; insufficient history or inconclusive comparisons limit what can be recommended.</p>
+        <p>These methods provide decision support for planning. Historical evaluation does not guarantee accuracy in a real disaster, where demand and operating conditions can change.</p>
+      </Chapter>
+
+      <Chapter id="testing" number={5} title="Testing and Evaluation">
+        <p>The capstone reports these results from controlled testing and evaluation scenarios. They describe the project’s study conditions and do not establish production security, reliability, or readiness for real disaster response.</p>
+        <dl className="evaluation-grid">
+          {qaStats.map((stat) => (
+            <div className="evaluation-item" key={stat.label}><dt>{stat.label}</dt><dd>{stat.value}</dd></div>
+          ))}
+        </dl>
+        <p>The study records <strong>72 of 72 accepted UAT cases</strong> across <strong>15 participants</strong>. Its mean System Usability Scale (SUS) score was <strong>67.17</strong>, slightly below the commonly used benchmark of <strong>68</strong>. The result points to room for usability refinement and user familiarization.</p>
+        <h3>What the evaluation does—and doesn’t—say</h3>
+        <ul>
+          <li>Functional checks, security-related cases, and reliability checks were conducted in defined scenarios.</li>
+          <li>User acceptance results reflect the study’s participants and evaluation setup.</li>
+          <li>Passing the documented test cases does not guarantee security or production readiness.</li>
+          <li>Offline support applies to prepared workflows; queued work needs successful synchronization and server validation.</li>
+          <li>Before broader use, the project would need stronger protection for sensitive offline data and tested backup and recovery procedures.</li>
+        </ul>
+      </Chapter>
+
+      <Chapter id="reflection" number={6} title="Creator’s Notes">
+        <p>Working on DISTYNC helped me connect requirements, system design, data, testing, and team collaboration. I learned to ask how each workflow supports the people involved, and to treat validation and feedback as part of building—not a final checkbox.</p>
+      </Chapter>
+
+      <ArchiveSection title="Project source" eyebrow="APPROVED TEAM REPOSITORY">
+        <ul className="source-links">
+          <li><a href={projectLinks.distyncRepo} target="_blank" rel="noopener noreferrer">DISTYNC team repository <span aria-hidden="true">↗</span></a></li>
+        </ul>
+      </ArchiveSection>
+    </WorkDetailLayout>
+  );
 }
 
-function LostFound() {
-  const screenshotAnchors = projectGalleryImages.lostAndFound.length > 0
-    ? [{ id: 'screenshots', label: 'Project images' }]
-    : [];
-  const anchors: StudyAnchor[] = [
-    { id: 'problem', label: 'The problem' },
-    { id: 'role', label: 'My role' },
-    ...screenshotAnchors,
-    { id: 'architecture', label: 'Architecture' },
-    { id: 'quality', label: 'Testing & deployment' },
-    { id: 'reflection', label: 'Reflection' },
-  ];
+function LostAndFoundPage() {
+  const work = works.find((item) => item.id === 'lostAndFound')!;
 
-  return <main id="top" tabIndex={-1} className="container study-layout">
-    <Breadcrumb project="Campus Lost & Found"/>
-    <StudyHeader kicker="02 / INDIVIDUAL PROJECT" title="Campus Lost & Found: Making it easier to reconnect people and belongings." intro="A full-stack campus application where people can report lost or found items, browse listings, and submit ownership claims—with an AI-assisted report-review feature." theme="pink" tags={['Full-stack development','API integration','Software testing','Gemini AI']}/>
-    <div className="study-overview">
-      <div><span className="small-label">PROJECT TYPE</span><strong>Individual project</strong></div>
-      <div><span className="small-label">FRONTEND</span><strong>React · TypeScript · Vite</strong></div>
-      <div><span className="small-label">BACKEND</span><strong>Express · MongoDB · Gemini API</strong></div>
-    </div>
-    <div className="study-grid">
-      <article className="study-body">
-        <StudySection id="problem" kicker="01 / THE PROBLEM" title="A more organized way to look for lost items">
-          <p>Campus lost-and-found reports can be scattered or incomplete. This project explores a clearer user journey: report an item, browse existing reports, and submit a claim supported by relevant ownership information.</p>
-        </StudySection>
-        <StudySection id="role" kicker="02 / MY ROLE" title="Built across the stack">
-          <p>I developed the frontend and backend, connected routes and REST APIs to MongoDB, and implemented authentication, protected claim workflows, form validation, and the Gemini-powered report-review feature. I used Codex as a development assistant and remained responsible for reviewing and understanding the implementation.</p>
-          <div className="journey-grid">
-            <div><span>01</span><strong>Report</strong><p>Submit item details using validated forms.</p></div>
-            <div><span>02</span><strong>Browse</strong><p>Explore existing lost and found reports.</p></div>
-            <div><span>03</span><strong>Claim</strong><p>Provide information to support an ownership request.</p></div>
-          </div>
-        </StudySection>
-        {projectGalleryImages.lostAndFound.length > 0 && <StudySection id="screenshots" kicker="PROJECT VISUALS" title="Selected project images"><ProjectGallery label="Campus Lost & Found approved project images" images={projectGalleryImages.lostAndFound}/></StudySection>}
-        <StudySection id="architecture" kicker="03 / ARCHITECTURE" title="From interface to services">
-          <p>The React frontend communicates with an Express API, which manages access to MongoDB through Mongoose and integrates Gemini for report-review assistance.</p>
-          <div className="workflow-card">
-            <div className="workflow-card-top"><strong>Application architecture</strong><a href="/diagrams/lost-found-architecture.svg" target="_blank" rel="noopener noreferrer" className="diagram-open">Open full diagram <Icon name="upRight" size={13}/></a></div>
-            <p className="diagram-scroll-cue diagram-scroll-cue--architecture" id="architecture-scroll-cue">Scroll horizontally to view the full diagram <span aria-hidden="true">↔</span></p>
-            <div className="workflow-image-viewport diagram-viewport--architecture" role="region" aria-label="Scrollable application architecture diagram" aria-describedby="architecture-scroll-cue" tabIndex={0}>
-              <img className="diagram-image diagram-image--architecture" src="/diagrams/lost-found-architecture.svg" alt="Browser interacts with React/Vite frontend; frontend sends authenticated requests to Express API; Express connects to MongoDB Atlas through Mongoose and to Gemini API." loading="lazy"/>
-            </div>
-            <p>Diagram adapted from the application's own README.</p>
-          </div>
-        </StudySection>
-        <StudySection id="quality" kicker="04 / QUALITY" title="Testing, iteration, and deployment">
-          <p>The frontend repository documents Vitest tests, linting, a TypeScript production build, and a GitHub Actions CI workflow. This project also gave me practical experience reviewing API integration, validation, application routes, and deployment behavior.</p>
-          <div className="insight-note"><Icon name="check" size={20}/><span>AI tools supported selected development tasks; they did not replace manual review, testing, and technical responsibility.</span></div>
-        </StudySection>
-        <StudySection id="reflection" kicker="05 / REFLECTION" title="What the project taught me">
-          <p>Building the complete user journey strengthened my understanding of how frontend decisions, API contracts, data modeling, and reliability all affect a user's experience. It also reinforced why small tests and good documentation matter.</p>
-        </StudySection>
-      </article>
-      <StudySidebar sections={anchors}>
-        <div className="sidebar-detail-block">
-          <span className="small-label">SOURCE CODE</span>
-          <a className="source-link" href={projectLinks.lostFrontend} target="_blank" rel="noopener noreferrer"><Icon name="github" size={17}/> Frontend repository <Icon name="upRight" size={16}/></a>
-          <a className="source-link" href={projectLinks.lostBackend} target="_blank" rel="noopener noreferrer"><Icon name="github" size={17}/> Backend repository <Icon name="upRight" size={16}/></a>
-        </div>
-        <div className="sidebar-detail-block">
-          <span className="small-label">TOOLS & TECHNOLOGIES</span>
-          <div className="side-pills"><Pill>React</Pill><Pill>TypeScript</Pill><Pill>Express</Pill><Pill>MongoDB</Pill><Pill>Gemini API</Pill><Pill>Vitest</Pill><Pill>Vercel</Pill></div>
-        </div>
-      </StudySidebar>
-    </div>
-    <NextProject to="/projects/distync" title="DISTYNC" subtitle="Other featured project"/>
-  </main>;
+  return (
+    <WorkDetailLayout work={work}>
+      <Chapter id="idea" number={1} title="The Idea">
+        <p>Campus lost-and-found information can be spread across informal reports or incomplete records. I built this project around a straightforward goal: give people a place to report an item, browse existing listings, and submit an ownership claim.</p>
+      </Chapter>
+
+      <Chapter id="building" number={2} title="Building the Application">
+        <p>This is an individual academic project. I built the frontend and backend, connected the routes and REST API to MongoDB, and worked on authentication, claim workflows, form validation, and Gemini-assisted report review.</p>
+        <p>I used Codex as a development assistant and remained responsible for reviewing and understanding the implementation.</p>
+      </Chapter>
+
+      <Chapter id="journey" number={3} title="How It Works">
+        <ol className="journey-list">
+          <li><strong>Report:</strong> submit details about a lost or found item through a validated form.</li>
+          <li><strong>Browse:</strong> review existing lost-and-found reports.</li>
+          <li><strong>Claim:</strong> submit information to support an ownership request.</li>
+        </ol>
+        <p>Authentication and protected API requests support the parts of the application that require an account.</p>
+      </Chapter>
+
+      <Chapter id="architecture" number={4} title="Behind the Scenes">
+        <p>The frontend uses React, TypeScript, and Vite. It communicates with an Express and TypeScript REST API using authenticated JWT-bearing requests. The API works with MongoDB Atlas through Mongoose and integrates the Gemini API for report-review assistance.</p>
+        <p>The project diagram shows the frontend and Express API deployed on Vercel, with MongoDB Atlas and Gemini as external services.</p>
+        <DiagramViewer
+          title="Campus Lost & Found application architecture"
+          src="/diagrams/lost-found-architecture.svg"
+          alt="The browser uses a React and Vite frontend hosted on Vercel. The frontend sends authenticated requests to an Express API hosted on Vercel. The API connects to MongoDB Atlas through Mongoose and to the Gemini API."
+          hintId="architecture-diagram-hint"
+          minWidth={660}
+        />
+      </Chapter>
+
+      <Chapter id="iteration" number={5} title="Testing and Iteration">
+        <p>The frontend repository documents Vitest tests, linting, a TypeScript production build, and a GitHub Actions continuous-integration workflow. Those artifacts describe the frontend checks; I’m not presenting a test-coverage percentage or results that the project materials don’t support.</p>
+        <p>Building and reviewing the application also gave me practice checking forms, route behavior, API communication, and the report-to-claim user flow.</p>
+      </Chapter>
+
+      <Chapter id="reflection" number={6} title="Creator’s Notes">
+        <p>Building a full-stack project made the connections between the interface, API contracts, data modeling, and user experience much clearer to me. It also reinforced the value of testing the complete journey and documenting how the parts fit together.</p>
+      </Chapter>
+
+      <ArchiveSection title="Project source" eyebrow="VERIFIED LINKS">
+        <ul className="source-links">
+          <li><a href={projectLinks.lostFrontend} target="_blank" rel="noopener noreferrer">Frontend repository <span aria-hidden="true">↗</span></a></li>
+          <li><a href={projectLinks.lostBackend} target="_blank" rel="noopener noreferrer">Backend repository <span aria-hidden="true">↗</span></a></li>
+        </ul>
+      </ArchiveSection>
+    </WorkDetailLayout>
+  );
 }
-function NextProject({to,title,subtitle}: {to:string;title:string;subtitle:string}) {return <Link className="next-project" to={to}><span>{subtitle}</span><strong>{title}<Icon name="upRight" size={27}/></strong></Link>}
-function NotFound(){return <main id="top" tabIndex={-1} className="container not-found"><Kicker>404 / PAGE NOT FOUND</Kicker><h1>Oops. A little detour.</h1><p>This page doesn't seem to exist, but the rest of the portfolio is right where you left it.</p><ButtonLink to="/">Back home</ButtonLink></main>}
-export default function App(){return <><a className="skip-link" href="#top">Skip to main content</a><ScrollManager/><Header/><Routes><Route path="/" element={<Home/>}/><Route path="/projects/distync" element={<Distync/>}/><Route path="/projects/lost-and-found" element={<LostFound/>}/><Route path="*" element={<NotFound/>}/></Routes><Footer/></>}
+
+function NotFoundPage() {
+  return (
+    <main id="main-content" tabIndex={-1} className="page-shell not-found-page">
+      <Breadcrumbs items={[{ label: 'Not found' }]} />
+      <p className="section-kicker">404 · PAGE NOT FOUND</p>
+      <h1>This page isn’t in the archive.</h1>
+      <p>The address may have changed, but the project archive is still here.</p>
+      <p className="action-links"><Link to="/">Return home</Link><Link to="/works">Browse works</Link></p>
+    </main>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
+      <ScrollAndTitleManager />
+      <Header />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/works" element={<WorksPage />} />
+        <Route path="/works/distync" element={<DistyncPage />} />
+        <Route path="/works/lost-and-found" element={<LostAndFoundPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/tags" element={<TagsPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/projects/distync" element={<Navigate to="/works/distync" replace />} />
+        <Route path="/projects/lost-and-found" element={<Navigate to="/works/lost-and-found" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+      <Footer />
+    </>
+  );
+}
