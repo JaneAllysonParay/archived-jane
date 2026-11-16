@@ -3,7 +3,8 @@ import type { ReactNode } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import ProjectGallery from './ProjectGallery';
 import CorrespondenceForm from './CorrespondenceForm';
-import { formspreeEndpoint, projectGalleryImages, projectLinks, qaStats, site } from './content';
+import { credentials, formspreeEndpoint, projectGalleryImages, projectLinks, qaStats, site } from './content';
+import type { PortfolioCredential } from './content';
 import { tagGroups, workTags, works } from './portfolio';
 import type { ArchiveWork, WorkChapter } from './portfolio';
 
@@ -301,6 +302,45 @@ function WorksPage() {
   );
 }
 
+function CredentialEntry({ credential }: { credential: PortfolioCredential }) {
+  return (
+    <article className="credential-entry">
+      <h3>{credential.title}</h3>
+      <p className="credential-byline">
+        {credential.issuer && <span>Issuer: {credential.issuer}</span>}
+        {credential.program && <span>Program: {credential.program}</span>}
+        {credential.organizer && <span>Organizer: {credential.organizer}</span>}
+        {credential.supportedBy && <span>Supported by: {credential.supportedBy}</span>}
+      </p>
+      <dl className="credential-metadata">
+        <div><dt>Credential type</dt><dd>{credential.credentialType}</dd></div>
+        <div><dt>{credential.dateLabel}</dt><dd>{credential.date}</dd></div>
+        {credential.courseLength && <div><dt>Course length</dt><dd>{credential.courseLength}</dd></div>}
+      </dl>
+      <div className="credential-tag-section">
+        <span className="small-label">RELEVANT TAGS</span>
+        <ul className="credential-tags" aria-label={'Relevant tags for ' + credential.title}>
+          {credential.tags.map((tag) => <li key={tag}><span>{tag}</span></li>)}
+        </ul>
+      </div>
+      {(credential.certificatePath || credential.credentialUrl) && (
+        <div className="credential-actions">
+          {credential.certificatePath && (
+            <a href={credential.certificatePath} target="_blank" rel="noopener noreferrer" aria-label={'View certificate: ' + credential.title}>
+              View Certificate <span aria-hidden="true">↗</span>
+            </a>
+          )}
+          {credential.credentialUrl && (
+            <a href={credential.credentialUrl} target="_blank" rel="noopener noreferrer" aria-label={'Verify credential: ' + credential.title}>
+              Verify Credential <span aria-hidden="true">↗</span>
+            </a>
+          )}
+        </div>
+      )}
+    </article>
+  );
+}
+
 function ProfilePage() {
   const skillGroups = [
     { title: 'Analysis and Documentation', skills: ['Requirements and workflow analysis', 'Technical documentation', 'Architecture planning', 'Stakeholder discussions'] },
@@ -342,6 +382,12 @@ function ProfilePage() {
           ))}
         </div>
         <p className="small-note">Coursework and lab tools are included as academic exposure, not as claims of professional mastery.</p>
+      </ArchiveSection>
+
+      <ArchiveSection title="Credentials & Certifications" eyebrow="COURSES & PROGRAMS">
+        <div className="credential-list">
+          {credentials.map((credential) => <CredentialEntry key={credential.id} credential={credential} />)}
+        </div>
       </ArchiveSection>
 
       <ArchiveSection title="Leadership and Activities" eyebrow="WORKING WITH PEOPLE">

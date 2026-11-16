@@ -918,6 +918,115 @@ button {
   color: var(--muted);
 }
 
+.credential-list {
+  border: 1px solid var(--border);
+  background: var(--paper);
+}
+
+.credential-entry {
+  min-width: 0;
+  padding: 13px 16px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.credential-entry:last-child {
+  border-bottom: 0;
+}
+
+.credential-entry:nth-child(even) {
+  background: #faf9f8;
+}
+
+.credential-entry h3 {
+  margin: 0;
+  color: var(--burgundy-dark);
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  line-height: 1.35;
+}
+
+.credential-byline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin: 4px 0 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.credential-metadata {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 22px;
+  margin: 8px 0 10px;
+}
+
+.credential-metadata > div {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(94px, 0.42fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.credential-metadata dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.credential-metadata dd {
+  min-width: 0;
+  margin: 0;
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+}
+
+.credential-tag-section {
+  margin-top: 7px;
+}
+
+.credential-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 5px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.credential-tags li {
+  max-width: 100%;
+}
+
+.credential-tags span {
+  display: inline-block;
+  min-height: 27px;
+  padding: 2px 7px;
+  border: 1px solid #c9c3c3;
+  border-radius: 2px;
+  background: #f6f4f4;
+  color: #5b1018;
+  font-size: 0.77rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.credential-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 18px;
+  margin-top: 9px;
+}
+
+.credential-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 34px;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
 .skill-groups {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1395,6 +1504,10 @@ button {
   }
 
   .skill-groups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .credential-metadata {
     grid-template-columns: minmax(0, 1fr);
   }
 
