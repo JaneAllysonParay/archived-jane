@@ -81,6 +81,18 @@ export const credentials: PortfolioCredential[] = [
     tags: ["AI Career Readiness", "Professional Development"],
     certificatePath: "/assets/credentials/asean-ahead-ai-career-readiness.png",
   },
+  {
+    id: "dec-ai-literacy-for-all",
+    title: "AI Literacy for All",
+    program: "DEC x DLSL AI Literacy for All",
+    organizer: "Digital Education Council and De La Salle Lipa",
+    supportedBy: "LinkedIn",
+    credentialType: "Certificate of Completion",
+    dateLabel: "Issued",
+    date: "November 17, 2026",
+    tags: ["AI Literacy", "Digital Skills"],
+    certificatePath: "/assets/credentials/dec-ai-literacy-for-all.pdf",
+  },
 ];
 
 export const qaStats = [
